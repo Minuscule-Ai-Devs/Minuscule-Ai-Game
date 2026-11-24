@@ -1,0 +1,6 @@
+{
+  "name": "Minuscule",
+  "description": "Find the smallest pixel, recreate tiny AI specimens in CopyCat prompt duels, and clear daily hidden-object pixel dioramas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
