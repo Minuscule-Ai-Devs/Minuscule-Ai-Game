@@ -151,7 +151,7 @@ export function TinyHuntGame({
   function handleTilePick(idx: number) {
     if (phase !== 'hunt' || !activeRound) return;
     if (idx === activeRound.targetKey) {
-      sound.found();
+      sound.specimenFound();
       setPingedKey(null);
       setPhase('guess');
     } else {
@@ -222,8 +222,8 @@ export function TinyHuntGame({
         bestCopyScore: Math.max(progression.stats.bestCopyScore, judgment.score),
       });
 
+      sound.copyMatch(judgment.score);
       if (pts >= 75) {
-        sound.victory();
         confetti({
           particleCount: 70,
           spread: 70,
@@ -231,8 +231,6 @@ export function TinyHuntGame({
           colors: ['#c3f24d', '#f96294', '#f8f6f0'],
           disableForReducedMotion: true,
         });
-      } else {
-        sound.found();
       }
     } catch (err) {
       setPhase('guess');
@@ -241,8 +239,8 @@ export function TinyHuntGame({
   }
 
   function handleNextRound() {
-    sound.tap();
     if (playMode === 'daily' && roundIndex >= dailyConfig.rounds.length - 1) {
+      sound.dailyRunComplete();
       setPhase('done');
       const finalTotal = results.reduce((acc, r) => acc + r.points, 0);
       onReward(
@@ -257,6 +255,7 @@ export function TinyHuntGame({
       onRecordRun('hunt', finalTotal, `${results.length} rounds · daily`);
       return;
     }
+    sound.tap();
 
     const nextIdx = roundIndex + 1;
     if (playMode === 'endless') {

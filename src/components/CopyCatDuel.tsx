@@ -66,7 +66,7 @@ export function CopyCatDuel({
         setAttempt1(judgment);
         setPreviewAttempt(1);
         setAttempt(2);
-        sound.found();
+        sound.copyMatch(judgment.score);
       } else {
         setAttempt2(judgment);
         setPreviewAttempt(2);
@@ -85,7 +85,7 @@ export function CopyCatDuel({
             disableForReducedMotion: true,
           });
         } else {
-          sound.found();
+          sound.copyMatch(judgment.score);
         }
       }
     } catch (err) {

@@ -23,6 +23,7 @@ import { sound } from './lib/sound.ts';
 
 const PROGRESSION_KEY = 'minuscule:progression:v2';
 const HIDE_HELP_KEY = 'minuscule:hideHowToPlay:v1';
+const MUTE_KEY = 'minuscule:muted:v1';
 
 function createDefaultProgression(): PlayerProgression {
   const id =
@@ -76,7 +77,15 @@ export default function App() {
   const [progression, setProgression] = useState<PlayerProgression>(() => loadProgression());
   const [dailyConfig, setDailyConfig] = useState<DailyConfig | null>(null);
   const [todayRuns, setTodayRuns] = useState<LeaderboardEntry[]>([]);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(MUTE_KEY) === 'true';
+      sound.setMuted(saved);
+      return saved;
+    } catch {
+      return false;
+    }
+  });
   const [sharePayload, setSharePayload] = useState<SharePayload | null>(null);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [dontShowHelpAgain, setDontShowHelpAgain] = useState<boolean>(() => {
@@ -108,6 +117,16 @@ export default function App() {
       // ignore storage quota errors
     }
   }, [progression]);
+
+  // Keep SoundEngine muted state synced with App state
+  useEffect(() => {
+    sound.setMuted(muted);
+    try {
+      localStorage.setItem(MUTE_KEY, muted ? 'true' : 'false');
+    } catch {
+      // ignore storage quota errors
+    }
+  }, [muted]);
 
   // Fetch daily challenge & runs
   useEffect(() => {
@@ -275,8 +294,9 @@ export default function App() {
         muted={muted}
         onToggleMute={() => {
           const next = !muted;
-          sound.muted = next;
+          sound.setMuted(next);
           setMuted(next);
+          if (!next) sound.tap();
         }}
         onUpdateName={(name) => setProgression((p) => ({ ...p, playerName: name }))}
         onQuickShare={handleQuickShare}

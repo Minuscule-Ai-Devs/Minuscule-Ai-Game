@@ -1,10 +1,19 @@
 import { useId, useState } from 'react';
 import type { CopySceneBlueprint } from '../types/game.ts';
 
+function normalizeSvgColor(raw: string | undefined, fallback: string): string {
+  if (!raw) return fallback;
+  const trimmed = raw.trim();
+  if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) return trimmed;
+  if (/^[0-9a-fA-F]{3,8}$/.test(trimmed)) return `#${trimmed}`;
+  return trimmed || fallback;
+}
+
 export function CopyCatSvgRenderer({ blueprint, label }: { blueprint: CopySceneBlueprint; label?: string }) {
   const gradId = useId();
-  const skyTop = blueprint?.skyTop || '#e2e8f0';
-  const skyBottom = blueprint?.skyBottom || '#cbd5e1';
+  const skyTop = normalizeSvgColor(blueprint?.skyTop, '#e2e8f0');
+  const skyBottom = normalizeSvgColor(blueprint?.skyBottom, '#cbd5e1');
+  const groundColor = blueprint?.groundColor ? normalizeSvgColor(blueprint.groundColor, '#334155') : undefined;
   const shapes = Array.isArray(blueprint?.shapes) ? blueprint.shapes : [];
 
   return (
@@ -21,19 +30,19 @@ export function CopyCatSvgRenderer({ blueprint, label }: { blueprint: CopySceneB
         </linearGradient>
       </defs>
       <rect x="0" y="0" width="100" height="100" fill={`url(#${gradId})`} />
-      {blueprint?.groundColor && typeof blueprint.groundY === 'number' && (
+      {groundColor && typeof blueprint.groundY === 'number' && (
         <rect
           x="0"
           y={Math.max(0, Math.min(100, blueprint.groundY))}
           width="100"
           height={Math.max(0, 100 - blueprint.groundY)}
-          fill={blueprint.groundColor}
+          fill={groundColor}
         />
       )}
       {shapes.map((s, idx) => {
         const common = {
-          fill: s.fill || '#3b5bff',
-          stroke: s.stroke,
+          fill: normalizeSvgColor(s.fill, '#3b5bff'),
+          stroke: s.stroke ? normalizeSvgColor(s.stroke, '#111827') : undefined,
           strokeWidth: s.strokeWidth,
           opacity: typeof s.opacity === 'number' ? s.opacity : 1,
         };
